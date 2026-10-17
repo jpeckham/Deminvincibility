@@ -1,4 +1,4 @@
-﻿using SPT.Reflection.Patching;
+﻿using SPTushonka.Reflection.Patching;
 using EFT.HealthSystem;
 using HarmonyLib;
 using System;
@@ -11,30 +11,26 @@ namespace Deminvincibility.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(ActiveHealthController), "DoBleed");
+            // SPT 5.0 also has a DoBleed(bool isHeavy, EBodyPart bodyPart) overload, so pick the body part only one
+            return AccessTools.Method(typeof(ActiveHealthController), nameof(ActiveHealthController.DoBleed), new[] { typeof(EBodyPart) });
         }
 
         [PatchPrefix]
-        private static bool Prefix(ActiveHealthController __instance, EBodyPart bodyPart, Player ___Player)
+        private static bool Prefix(ActiveHealthController __instance, EBodyPart bodyPart)
         {
             try
             {
+                // IL2CPP interop exposes the controller's Player field as a property
+                var player = __instance.Player;
+
                 // Target is not our player - don't do anything
-                if (___Player == null || !___Player.IsYourPlayer && ___Player.IsAI)
+                if (player == null || !player.IsYourPlayer && player.IsAI)
                 {
                     return true;
                 }
 
-                if (DeminvicibilityPlugin.Keep1Health.Value && DeminvicibilityPlugin.MedicineBool.Value)
-                {
-                    Logger.LogMessage("DoBleed: Keep1Health & MedicineBool RETURN FALSE");
-                    return false;
-                }
-                else
-                {
-                    Logger.LogMessage("DoBleed: Keep1Health & MedicineBool RETURN TRUE");
-                    return true;
-                }
+                // Skip the bleed effect while both 1 HP mode and side effect removal are on
+                return !(DeminvicibilityPlugin.Keep1Health.Value && DeminvicibilityPlugin.MedicineBool.Value);
             }
             catch (Exception e)
             {

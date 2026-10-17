@@ -1,4 +1,4 @@
-﻿using SPT.Reflection.Patching;
+﻿using SPTushonka.Reflection.Patching;
 using EFT.HealthSystem;
 using HarmonyLib;
 using System;
@@ -15,12 +15,15 @@ namespace Deminvincibility.Patches
         }
 
         [PatchPrefix]
-        private static bool Prefix(ActiveHealthController __instance, EBodyPart bodyPart, Player ___Player)
+        private static bool Prefix(ActiveHealthController __instance, EBodyPart bodyPart)
         {
             try
             {
+                // IL2CPP interop exposes the controller's Player field as a property
+                var player = __instance.Player;
+
                 // Target is not our player - don't do anything
-                if (___Player == null || !___Player.IsYourPlayer && ___Player.IsAI)
+                if (player == null || !player.IsYourPlayer && player.IsAI)
                 {
                     return true;
                 }

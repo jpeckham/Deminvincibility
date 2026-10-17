@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using Deminvincibility.Model;
 using EFT;
 using EFT.HealthSystem;
@@ -22,12 +22,15 @@ namespace Deminvincibility.Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(ActiveHealthController __instance, EDamageType damageType, Player ___Player)
+        public static bool Prefix(ActiveHealthController __instance, EDamageType damageType)
         {
             try
             {
+                // IL2CPP interop exposes the controller's Player field as a property
+                var player = __instance.Player;
+
                 // Target is not our player - don't do anything
-                if (___Player == null || !___Player.IsYourPlayer && ___Player.IsAI)
+                if (player == null || !player.IsYourPlayer && player.IsAI)
                 {
                     return true;
                 }
@@ -44,7 +47,7 @@ namespace Deminvincibility.Patches
                     return false;
                 }
 
-                var hc = ___Player.ActiveHealthController;
+                var hc = player.ActiveHealthController;
                 var headHealth = hc.GetBodyPartHealth(EBodyPart.Head, false);
                 var chestHealth = hc.GetBodyPartHealth(EBodyPart.Chest, false);
 
@@ -81,7 +84,7 @@ namespace Deminvincibility.Patches
                                     targetChestHealth = chestHealth.Maximum;
                                     break;
                                 default:
-                                    Logger.LogError($"Unhandled SecondChanceRestoreEnum value: {DeminvicibilityPlugin.SecondChanceHealthRestoreAmount.Value}");
+                                    Logger.LogError($"未处理的 SecondChanceRestoreEnum 取值：{DeminvicibilityPlugin.SecondChanceHealthRestoreAmount.Value}");
                                     break;
                             }
 
@@ -111,8 +114,8 @@ namespace Deminvincibility.Patches
                         {
                             await Task.Delay(350); // 0.35 seconds of GodMode before protection ends
                             
-                            ConsoleScreen.Log("SECOND CHANCE PROTECTION SAVED YOU, GOOD LUCK!");
-                            Logger.LogMessage("SECOND CHANCE PROTECTION SAVED YOU, GOOD LUCK!");
+                            ConsoleScreen.Log("第二次机会保护已生效，祝你好运！");
+                            Logger.LogMessage("第二次机会保护已生效，祝你好运！");
                             HasSecondChance = false;
                             IsDebouncing = false;
 

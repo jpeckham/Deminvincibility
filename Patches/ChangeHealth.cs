@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Reflection;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using EFT.HealthSystem;
-using EFT.UI;
 using HarmonyLib;
 using EFT;
 using EFT.Ballistics;
@@ -17,35 +16,42 @@ namespace Deminvincibility.Patches
         }
 
         [PatchPrefix]
-        private static bool Prefix(ActiveHealthController __instance, Player ___Player, EBodyPart bodyPart, ref float value, DamageInfo damageInfo)
+        private static bool Prefix(ActiveHealthController __instance, EBodyPart bodyPart, ref float value, DamageInfo damageInfo)
         {
             try
             {
+                // IL2CPP interop exposes the controller's Player field as a property
+                var player = __instance.Player;
+
                 // Target is not our player - don't do anything
-                if (___Player == null || !___Player.IsYourPlayer && ___Player.IsAI)
+                if (player == null || !player.IsYourPlayer && player.IsAI)
                 {
                     return true;
                 }
 
-                var healthController = ___Player.ActiveHealthController;
-                var currentHealth = healthController.GetBodyPartHealth(bodyPart, false);
-
-                ConsoleScreen.Log("CHANGEHEALTH");
-                Logger.LogMessage("CHANGEHEALTH");
-
-                if (DeminvicibilityPlugin.Keep1Health.Value)
+                // Only clamp health loss. Heals (positive value) are always left alone.
+                if (!DeminvicibilityPlugin.Keep1Health.Value || value >= 0f)
                 {
-                    if (currentHealth.Current == 1f)
-                    {
-                        ConsoleScreen.Log("SET HEALTH");
-                        Logger.LogMessage("SET HEALTH");
-
-                        value = currentHealth.Current + 1f;
-                        currentHealth.Current = 1f;
-                        return false;
-                    }
+                    return true;
                 }
-                
+
+                var currentHealth = __instance.GetBodyPartHealth(bodyPart, false).Current;
+
+                // Head and Chest are always protected; other limbs are only protected
+                // when dropping to 0 HP is disallowed - same rule as ApplyDamage
+                var isProtectedPart = bodyPart == EBodyPart.Head
+                    || bodyPart == EBodyPart.Chest
+                    || !DeminvicibilityPlugin.Allow0HpLimbs.Value;
+
+                if (isProtectedPart && currentHealth + value < 1f)
+                {
+                    // Clamp the delta so the limb lands exactly on 1 HP instead of blacking out.
+                    // Math.Min keeps this from ever healing: a limb already below 1 HP stays put.
+                    value = Math.Min(0f, 1f - currentHealth);
+                }
+
+                // Let the original method run with the clamped delta
+                return true;
             }
             catch (Exception e)
             {

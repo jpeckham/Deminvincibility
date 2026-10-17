@@ -2,7 +2,7 @@
 using EFT.Ballistics;
 using EFT.HealthSystem;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using System;
 using System.Reflection;
 
@@ -27,17 +27,20 @@ namespace Deminvincibility.Patches
         }
         
         [PatchPrefix]
-        private static bool Prefix(ActiveHealthController __instance, Player ___Player, ref float damage, EBodyPart bodyPart, DamageInfo damageInfo)
+        private static bool Prefix(ActiveHealthController __instance, ref float damage, EBodyPart bodyPart, DamageInfo damageInfo)
         {
             try
             {
+                // IL2CPP interop exposes the controller's Player field as a property
+                var player = __instance.Player;
+
                 // Target is not our player - don't do anything
-                if (___Player == null || !___Player.IsYourPlayer && ___Player.IsAI)
+                if (player == null || !player.IsYourPlayer && player.IsAI)
                 {
                     return true;
                 }
 
-                var healthController = ___Player.ActiveHealthController;
+                var healthController = player.ActiveHealthController;
                 var currentHealth = healthController.GetBodyPartHealth(bodyPart, false);
 
                 // Remove negative health effects

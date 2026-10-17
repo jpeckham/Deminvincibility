@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using EFT;
 using EFT.HealthSystem;
 using HarmonyLib;
@@ -15,12 +15,15 @@ namespace Deminvincibility.Patches
         }
 
         [PatchPrefix]
-        private static bool Prefix(ActiveHealthController __instance, Player ___Player, EBodyPart bodyPart, EDamageType damageType)
+        private static bool Prefix(ActiveHealthController __instance, EBodyPart bodyPart, EDamageType damageType)
         {
             try
             {
+                // IL2CPP interop exposes the controller's Player field as a property
+                var player = __instance.Player;
+
                 // Target is not our player - don't do anything
-                if (___Player == null || !___Player.IsYourPlayer && ___Player.IsAI)
+                if (player == null || !player.IsYourPlayer && player.IsAI)
                 {
                     return true;
                 }

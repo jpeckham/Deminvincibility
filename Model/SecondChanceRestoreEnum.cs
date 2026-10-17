@@ -4,12 +4,12 @@ namespace Deminvincibility.Model;
 
 public enum SecondChanceRestoreEnum
 {
-    [Description("None")]
+    [Description("无")]
     None,
-    [Description("1HP")]
+    [Description("1 点生命")]
     OneHealth,
-    [Description("Half Limb Health")]
+    [Description("部位半血")]
     Half,
-    [Description("Full Limb Health")]
+    [Description("部位满血")]
     Full
 }

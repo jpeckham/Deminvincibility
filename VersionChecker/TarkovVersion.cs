@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -13,7 +13,7 @@ namespace VersionChecker
     public class TarkovVersion : Attribute
     {
         private int version;
-        public TarkovVersion() : this(47965) { }
+        public TarkovVersion() : this(48146) { }
         public TarkovVersion(int version)
         {
             this.version = version;

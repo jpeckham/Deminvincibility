@@ -3,7 +3,9 @@ A stripped out version of the "Keep 1 Health" section of [Props](https://hub.sp-
 
 With explicit permission from Props, this is being released as a standalone BepInEx mod based off of his as a learning experience for me to dive into BepInEx modding.
 
-Built for **SPT 5.0** (EFT 1.2.0.47965), which runs BepInEx 6 on IL2CPP.
+This branch targets the **local SPT 5.0 / EFT 1.2.5.0.48146** installation running BepInEx 6 on IL2CPP. It is not an official release by the original mod author.
+
+It starts from [y1ngq1ang's SPT 5.0 port](https://github.com/y1ngq1ang/Deminvincibility/commit/156c012800a418a75649c7914825595d50f202c4), originally targeting 47965. That commit is retained in this branch's history. Local version **3.0.1** restores the original English settings/notifications, updates the build path and recorded EFT build, and retains that port's five active patches, including its ChangeHealth fix. The damage slider now permits 100%, so its intended default is no longer clamped to 99%. Patch behavior otherwise remains unchanged.
 
 ## Features
 Currently, the following features are implemented:
@@ -13,17 +15,17 @@ Currently, the following features are implemented:
 - May be more in the near future
 
 ## How do I install this?
-1. Open `Deminvincibility.zip` (or the built `Deminvincibility.dll`) with 7-Zip
-2. Drag and drop the `BepInEx` folder straight into your SPT folder (the one that holds `SPT.Launcher.exe` / `SPT.Server.exe`)
-3. Profit
+1. Close the SPT client.
+2. Copy the built `Deminvincibility.dll` and `LICENSE.txt` into `<game root>/BepInEx/plugins/Deminvincibility/`. Do not extract a DLL with 7-Zip or put it inside `SPT_Runtime`.
+3. Start SPT normally. Open F12, select **Deminvincibility**, and enable **1. Health → 1 HP Mode** if desired. The inherited default is **off**, as is second-chance protection.
 
 The plugin lands in `BepInEx\plugins\`, and its settings show up under `F12` as `Deminvincibility`.
 
 ## Project Setup
 1. Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) — SPT 5.0 ships a .NET 10 runtime, so the plugin targets `net10.0`.
-2. Point the build at your SPT 5.0 install. The default in `Deminvincibility.csproj` is `C:\SPT-5.0-BE`; either edit the `SPTPath` property or pass it per build:
+2. Point the build at your SPT 5.0 install. The default in `Deminvincibility.csproj` is `C:\sptarkov\SPTarkov 5.0.0-local`; override it per build if needed:
    ```
-   dotnet build -p:SPTPath="D:\SPT 5.0"
+   dotnet build Deminvincibility.csproj -c Release -p:SPTPath="C:\sptarkov\SPTarkov 5.0.0-local"
    ```
 3. All references are taken straight from that install, so there is nothing to copy into `\references`:
    - `\BepInEx\core\` — `BepInEx.Core.dll`, `BepInEx.Unity.IL2CPP.dll`, `0Harmony.dll`, `Il2CppInterop.*`
@@ -33,10 +35,18 @@ The plugin lands in `BepInEx\plugins\`, and its settings show up under `F12` as 
 The built DLL is copied to `Build\BepInEx\plugins\` after each successful build; copy that into your SPT install to test.
 
 ## Porting notes (4.x -> 5.0)
-- Plugin base class moved to `BepInEx.Unity.IL2CPP.BaseUnityPlugin`.
+- Plugin base class moved to `BepInEx.Unity.IL2CPP.BasePlugin`, using `Load()`.
 - Patching helpers moved from `SPT.Reflection.Patching` to `SPTushonka.Reflection.Patching` (`ModulePatch`, `PatchPrefix`).
 - The game is IL2CPP now, so the assemblies under `BepInEx\interop\` are interop stubs. Il2CppInterop turns instance fields into properties, so Harmony `___Field` injection no longer works — the patches read `__instance.Player` instead of an injected `Player` field.
 - `EBodyPart` now lives in the global namespace (assembly `PlayerEnums.dll`) instead of `EFT`.
+
+## Validation and limits
+
+The community baseline and English local build both compile against the installed 48146 reference assemblies with zero errors and zero warnings. The active targets are `ActiveHealthController.ApplyDamage`, `ChangeHealth`, `DestroyBodyPart`, `DoFracture`, and `Kill`; the unused DoBleed patch remains disabled as in the community port.
+
+A client startup test with LocalBuildTest logged `Loading [Deminvincibility 3.0.1]`, all five `Enabled patch` messages, and `Chainloader startup complete`. This verifies loading and patch installation, not in-raid invincibility or second-chance behavior. The test client and server were stopped afterward. Evidence is retained in the parent workspace's `.local-build-attempt/2026-10-28/deminvincibility-test` directory.
+
+The old optional second-chance implementation is retained, including its process-wide state and asynchronous notification. This port does not claim to fix that feature's inherited behavior. The legacy `VersionChecker/setbuild.ps1` helper is not used by the SDK build and still expects an old AssemblyInfo layout; use the build command above.
 
 ## Credits
 A huge thanks to the following people:

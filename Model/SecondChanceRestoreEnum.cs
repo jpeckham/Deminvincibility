@@ -1,15 +1,15 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace Deminvincibility.Model;
 
 public enum SecondChanceRestoreEnum
 {
-    [Description("无")]
+    [Description("None")]
     None,
-    [Description("1 点生命")]
+    [Description("1HP")]
     OneHealth,
-    [Description("部位半血")]
+    [Description("Half Limb Health")]
     Half,
-    [Description("部位满血")]
+    [Description("Full Limb Health")]
     Full
 }

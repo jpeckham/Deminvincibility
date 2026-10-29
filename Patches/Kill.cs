@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using SPTushonka.Reflection.Patching;
@@ -84,7 +84,7 @@ namespace Deminvincibility.Patches
                                     targetChestHealth = chestHealth.Maximum;
                                     break;
                                 default:
-                                    Logger.LogError($"未处理的 SecondChanceRestoreEnum 取值：{DeminvicibilityPlugin.SecondChanceHealthRestoreAmount.Value}");
+                                    Logger.LogError($"Unhandled SecondChanceRestoreEnum value: {DeminvicibilityPlugin.SecondChanceHealthRestoreAmount.Value}");
                                     break;
                             }
 
@@ -114,8 +114,8 @@ namespace Deminvincibility.Patches
                         {
                             await Task.Delay(350); // 0.35 seconds of GodMode before protection ends
                             
-                            ConsoleScreen.Log("第二次机会保护已生效，祝你好运！");
-                            Logger.LogMessage("第二次机会保护已生效，祝你好运！");
+                            ConsoleScreen.Log("SECOND CHANCE PROTECTION SAVED YOU, GOOD LUCK!");
+                            Logger.LogMessage("SECOND CHANCE PROTECTION SAVED YOU, GOOD LUCK!");
                             HasSecondChance = false;
                             IsDebouncing = false;
 

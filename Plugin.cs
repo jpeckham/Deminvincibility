@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using Deminvincibility.Model;
@@ -6,7 +6,7 @@ using Deminvincibility.Patches;
 
 namespace Deminvincibility
 {
-    [BepInPlugin("com.hazelify.deminvincibility", "Deminvincibility", "3.0.0")]
+    [BepInPlugin("com.hazelify.deminvincibility", "Deminvincibility", "3.0.1")]
     public class DeminvicibilityPlugin : BasePlugin
     {
         // private static string credits = "Thanks Props <3 Ily https://github.com/dvize/DadGamerMode";
@@ -38,52 +38,57 @@ namespace Deminvincibility
 
         private void InitConfig()
         {
-            // 1. 生命值
-            Keep1Health = Config.Bind("1. 生命值", "1 点生命模式", false,
-                new ConfigDescription("启用后你不会被击杀，生命值最低保留在设定值。",
+            // 1. Health
+            Keep1Health = Config.Bind("1. Health", "1 HP Mode", false,
+                new ConfigDescription("Enable to keep yourself from dying",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = false, Order = 7 }));
 
-            Allow0HpLimbs = Config.Bind("1. 生命值", "允许四肢降至 0 点生命", false,
-                new ConfigDescription("启用后，在开启「1 点生命模式」时，手臂和腿部可以降到 0 点生命。",
+            Allow0HpLimbs = Config.Bind("1. Health", "Allow 0hp on limbs", false,
+                new ConfigDescription("If enabled, Keep 1 Health on will allow arms and legs to hit 0 hp.",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = false, Order = 6 }));
 
-            AllowBlacking = Config.Bind("1. 生命值", "允许四肢变黑", false,
-                new ConfigDescription("启用后，在开启「1 点生命模式」时，四肢降到 0 点生命会被打黑。",
+            AllowBlacking = Config.Bind("1. Health", "Allow blacking of limbs", false,
+                new ConfigDescription(
+                    "If enabled, Keep 1 Health on will cause blacking of limbs when they reach 0hp.",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = false, Order = 5 }));
 
-            AllowBlackingHeadAndThorax = Config.Bind("1. 生命值", "允许头部和胸腔变黑", false,
-                new ConfigDescription("启用后，头部和胸腔降到 0 点生命会被打黑。若「允许四肢变黑」未开启，本项会被忽略。",
+            AllowBlackingHeadAndThorax = Config.Bind("1. Health", "Allow blacking of Head & Thorax", false,
+                new ConfigDescription(
+                    "If enabled, Head & Thorax will be blacked out when they reach 0hp. This setting is ignored if \'Allow blacking of limbs\' is disabled.",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = false, Order = 4 }));
 
-            MedicineBool = Config.Bind("1. 生命值", "忽略生命值负面效果", false,
-                new ConfigDescription("启用后，骨折、流血等生命值负面效果会被自动治疗。\n\n提示：关闭此项可能产生意料之外的效果，请谨慎使用。",
+            MedicineBool = Config.Bind("1. Health", "Ignore health side effects?", false,
+                new ConfigDescription(
+                    "If enabled, fractures, bleeds and other forms of side effects to your health will be auto-healed.\n\nPSA: Disabling this could cause unintended side effects, use caution.",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = false, Order = 3 }));
 
-            CustomDamageModeVal = Config.Bind("1. 生命值", "受到伤害百分比", 100, new ConfigDescription(
-                "设置实际受到的伤害百分比。",
-                new AcceptableValueRange<int>(1, 99),
+            CustomDamageModeVal = Config.Bind("1. Health", "% Damage received", 100, new ConfigDescription(
+                "Set perceived damage in percent",
+                new AcceptableValueRange<int>(1, 100),
                 new ConfigurationManagerAttributes { IsAdvanced = false, ShowRangeAsPercent = true, Order = 2 }));
 
-            // 2. 死亡
-            SecondChanceProtection = Config.Bind("2. 死亡", "启用第二次机会保护", false,
-                new ConfigDescription("启用后，当你受到本应致命的伤害时，会获得一次免死机会。",
+            // 2. Death
+            SecondChanceProtection = Config.Bind("2. Death", "Enable second chance protection?", false,
+                new ConfigDescription(
+                    "If enabled, if you take a hit that would normally kill you, you\'ll be given a second chance to survive.",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = false, Order = 3 }));
 
-            SecondChanceEffectRemoval = Config.Bind("2. 死亡", "第二次机会：移除生命值负面效果", true,
-                new ConfigDescription("启用后，第二次机会触发时会移除角色身上所有生命值负面效果（流血、骨折等）。",
+            SecondChanceEffectRemoval = Config.Bind("2. Death", "Second chance health effect removal", true,
+                new ConfigDescription(
+                    "If enabled, all negative health effects (bleeds, fractures, etc.) will be removed from your character when second chance triggers.",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = false, Order = 2 }));
 
-            SecondChanceHealthRestoreAmount = Config.Bind("2. 死亡",
-                "第二次机会：关键部位恢复的生命值", SecondChanceRestoreEnum.OneHealth,
+            SecondChanceHealthRestoreAmount = Config.Bind("2. Death",
+                "Second chance health restore on critical limbs", SecondChanceRestoreEnum.OneHealth,
                 new ConfigDescription(
-                    "选择第二次机会触发时，头部和胸腔应被恢复到的生命值。若该部位当前生命值高于设定值，则不会扣血。\n\n若「移除生命值负面效果」已关闭，「无」和「1 点生命」选项风险较高。",
+                    "Choose what HP should be set on the Head and Thorax when second chance protection triggers. Will never remove health if the limb has more than the set amount. \n\n\'None\' and \'1HP\' options are risky if effect removal is disabled.",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = false, Order = 1 }));
         }

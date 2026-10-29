@@ -1,3 +1,5 @@
+> Locked baseline: EFT **1.2.5.0.48146**, SPT 5.0. Newer EFT work must use a separate branch and installation. The original `spt-5.0-48146` branch remains available as historical provenance.
+
 # Deminvincibility
 A stripped out version of the "Keep 1 Health" section of [Props](https://hub.sp-tarkov.com/user/18746-props/)' [DadGamerMode](https://hub.sp-tarkov.com/files/file/926-dad-gamer-mode) ([click here for repo](https://github.com/dvize/DadGamerMode)).
 
@@ -23,9 +25,9 @@ The plugin lands in `BepInEx\plugins\`, and its settings show up under `F12` as 
 
 ## Project Setup
 1. Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) — SPT 5.0 ships a .NET 10 runtime, so the plugin targets `net10.0`.
-2. Point the build at your SPT 5.0 install. The default in `Deminvincibility.csproj` is `C:\sptarkov\SPTarkov 5.0.0-local`; override it per build if needed:
+2. Point the build at your SPT 5.0 install. The default in `Deminvincibility.csproj` is `C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146`; override it per build if needed:
    ```
-   dotnet build Deminvincibility.csproj -c Release -p:SPTPath="C:\sptarkov\SPTarkov 5.0.0-local"
+   dotnet build Deminvincibility.csproj -c Release -p:SPTPath="C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146"
    ```
 3. All references are taken straight from that install, so there is nothing to copy into `\references`:
    - `\BepInEx\core\` — `BepInEx.Core.dll`, `BepInEx.Unity.IL2CPP.dll`, `0Harmony.dll`, `Il2CppInterop.*`
